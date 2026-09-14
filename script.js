@@ -1,10 +1,14 @@
 (() => {
-  const data = window.QUIZ_DATA || [];
+  const sets = window.QUIZ_SETS || {};
+  let selectedSetKey = 'latihan1';
+  let data = [];
+
   const welcomeCard = document.getElementById('welcomeCard');
   const quizApp = document.getElementById('quizApp');
   const resultCard = document.getElementById('resultCard');
   const startBtn = document.getElementById('startBtn');
   const retryBtn = document.getElementById('retryBtn');
+  const setPicker = document.getElementById('setPicker');
   const questionNav = document.getElementById('questionNav');
   const passageTitle = document.getElementById('passageTitle');
   const audioPlayer = document.getElementById('audioPlayer');
@@ -17,17 +21,36 @@
   const prevBtn = document.getElementById('prevBtn');
   const nextBtn = document.getElementById('nextBtn');
   const questionAlert = document.getElementById('questionAlert');
+  const activeSetLabel = document.getElementById('activeSetLabel');
+  const resultSetLabel = document.getElementById('resultSetLabel');
 
-  const state = {
-    current: 0,
-    answers: {},
-    checked: {},
-    score: 0
-  };
+  const state = { current: 0, answers: {}, checked: {}, score: 0 };
+
+  function resetState() {
+    state.current = 0;
+    state.answers = {};
+    state.checked = {};
+    state.score = 0;
+  }
 
   function encodePath(path) {
     return path.split('/').map(encodeURIComponent).join('/');
   }
+
+  function selectSet(key) {
+    selectedSetKey = key;
+    [...setPicker.querySelectorAll('.set-card')].forEach(card => {
+      const isSelected = card.dataset.set === key;
+      card.classList.toggle('selected', isSelected);
+      card.setAttribute('aria-checked', String(isSelected));
+    });
+    document.getElementById('startError').textContent = '';
+  }
+
+  setPicker.addEventListener('click', event => {
+    const card = event.target.closest('.set-card');
+    if (card) selectSet(card.dataset.set);
+  });
 
   function buildNav() {
     questionNav.innerHTML = '';
@@ -36,10 +59,7 @@
       btn.type = 'button';
       btn.dataset.index = index;
       btn.innerHTML = `<span class="nav-number">${q.id}</span><span class="nav-label">${q.section} – Soalan ${q.id}</span>`;
-      btn.addEventListener('click', () => {
-        state.current = index;
-        renderQuestion();
-      });
+      btn.addEventListener('click', () => { state.current = index; renderQuestion(); });
       questionNav.appendChild(btn);
     });
   }
@@ -72,14 +92,12 @@
       btn.type = 'button';
       btn.className = 'option-row';
       btn.innerHTML = `<span class="option-letter">${String.fromCharCode(65 + optionIndex)}</span><span>${option}</span>`;
-
       if (state.answers[state.current] === optionIndex) btn.classList.add('selected');
       if (state.checked[state.current]) {
         btn.disabled = true;
         if (optionIndex === q.answer) btn.classList.add('correct');
         if (optionIndex === state.answers[state.current] && optionIndex !== q.answer) btn.classList.add('wrong');
       }
-
       btn.addEventListener('click', () => {
         if (state.checked[state.current]) return;
         state.answers[state.current] = optionIndex;
@@ -92,9 +110,7 @@
     if (state.checked[state.current]) {
       const correct = state.answers[state.current] === q.answer;
       feedbackBox.className = `feedback-box ${correct ? 'good' : 'bad'}`;
-      feedbackBox.textContent = correct
-        ? `Betul. ${q.explanation}`
-        : `Jawapan yang tepat ialah ${String.fromCharCode(65 + q.answer)}. ${q.explanation}`;
+      feedbackBox.textContent = correct ? `Betul. ${q.explanation}` : `Jawapan yang tepat ialah ${String.fromCharCode(65 + q.answer)}. ${q.explanation}`;
     } else {
       feedbackBox.className = 'feedback-box hidden';
       feedbackBox.textContent = '';
@@ -114,7 +130,6 @@
       questionAlert.textContent = 'Pilih satu jawapan sebelum meneruskan.';
       return false;
     }
-
     if (!state.checked[index]) {
       state.checked[index] = true;
       if (state.answers[index] === q.answer) state.score += 1;
@@ -130,16 +145,12 @@
     document.getElementById('correctCount').textContent = state.score;
     document.getElementById('wrongCount').textContent = total - state.score;
     document.getElementById('percentage').textContent = `${percent}%`;
+    resultSetLabel.textContent = `${sets[selectedSetKey].title} selesai`;
 
     let title = 'Teruskan usaha!';
     let message = 'Dengar semula petikan dan teliti maklum balas bagi setiap soalan.';
-    if (percent >= 80) {
-      title = 'Syabas!';
-      message = 'Pencapaian yang sangat baik. Anda memahami kebanyakan maklumat penting dalam petikan.';
-    } else if (percent >= 60) {
-      title = 'Bagus!';
-      message = 'Pencapaian yang baik. Semak semula soalan yang tersilap untuk memperkukuh kefahaman.';
-    }
+    if (percent >= 80) { title = 'Syabas!'; message = 'Pencapaian yang sangat baik. Anda memahami kebanyakan maklumat penting dalam petikan.'; }
+    else if (percent >= 60) { title = 'Bagus!'; message = 'Pencapaian yang baik. Semak semula soalan yang tersilap untuk memperkukuh kefahaman.'; }
 
     document.getElementById('resultTitle').textContent = title;
     document.getElementById('resultMessage').textContent = message;
@@ -152,52 +163,60 @@
     const name = document.getElementById('studentName').value.trim();
     const klass = document.getElementById('studentClass').value.trim();
     const error = document.getElementById('startError');
+    const chosenSet = sets[selectedSetKey];
+
     if (!name || !klass) {
       error.textContent = 'Masukkan nama dan kelas sebelum memulakan latihan.';
       return;
     }
+    if (!chosenSet || !chosenSet.questions || chosenSet.questions.length === 0) {
+      error.textContent = 'Latihan 2 sudah disediakan sebagai set berasingan, tetapi soalan dan audio belum dimasukkan lagi.';
+      return;
+    }
+
+    data = chosenSet.questions;
+    resetState();
+    activeSetLabel.textContent = chosenSet.title;
+    buildNav();
     error.textContent = '';
     welcomeCard.classList.add('hidden');
+    resultCard.classList.add('hidden');
     quizApp.classList.remove('hidden');
     renderQuestion();
     quizApp.scrollIntoView({behavior:'smooth', block:'start'});
   });
 
   prevBtn.addEventListener('click', () => {
-    if (state.current > 0) {
-      state.current -= 1;
-      renderQuestion();
-    }
+    if (state.current > 0) { state.current -= 1; renderQuestion(); }
   });
 
   nextBtn.addEventListener('click', () => {
     if (!markCurrent()) return;
     renderQuestion();
-
     if (state.current === data.length - 1) {
       const allAnswered = data.every((_, index) => state.answers[index] !== undefined);
       if (!allAnswered) {
         const firstMissing = data.findIndex((_, index) => state.answers[index] === undefined);
-        questionAlert.textContent = 'Masih ada soalan yang belum dijawab.';
         state.current = firstMissing;
         renderQuestion();
+        questionAlert.textContent = 'Masih ada soalan yang belum dijawab.';
         return;
       }
       data.forEach((_, index) => {
-        if (!state.checked[index]) {
-          state.current = index;
-          markCurrent();
-        }
+        if (!state.checked[index]) { state.current = index; markCurrent(); }
       });
       showResults();
       return;
     }
-
     state.current += 1;
     renderQuestion();
   });
 
-  retryBtn.addEventListener('click', () => location.reload());
-
-  buildNav();
+  retryBtn.addEventListener('click', () => {
+    quizApp.classList.add('hidden');
+    resultCard.classList.add('hidden');
+    welcomeCard.classList.remove('hidden');
+    audioPlayer.pause();
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
 })();
