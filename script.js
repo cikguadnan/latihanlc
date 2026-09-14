@@ -28,6 +28,21 @@
 
   function resetState(){ state.current=0; state.answers={}; state.checked={}; state.score=0; }
   function encodePath(path){ return path.split('/').map(encodeURIComponent).join('/'); }
+  function assetUrl(path, folder=''){
+    if(!path) return '';
+    if(/^(https?:|data:|blob:)/i.test(path)) return path;
+    const cleanFolder=(folder||'').replace(/^\/+|\/+$/g,'');
+    const cleanPath=path.replace(/^\/+/, '');
+    return encodePath(cleanFolder ? `${cleanFolder}/${cleanPath}` : cleanPath);
+  }
+  function normalizeOption(option){
+    if(typeof option==='string') return {text:option,image:'',alt:option};
+    return {
+      text: option?.text || '',
+      image: option?.image || option?.src || '',
+      alt: option?.alt || option?.text || 'Pilihan jawapan bergambar'
+    };
+  }
   function goHome(){ audioPlayer.pause(); audioPlayer.currentTime=0; quizApp.classList.add('hidden'); resultCard.classList.add('hidden'); welcomeCard.classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'}); }
   function selectSet(key){
     selectedSetKey=key;
@@ -55,14 +70,28 @@
   }
   function renderQuestion(){
     if(!data.length)return; const q=data[state.current]; const chosenSet=sets[selectedSetKey]; passageTitle.textContent=q.section;
-    const folder=chosenSet.audioFolder||'audio'; const nextAudio=encodePath(`${folder}/${q.track}`);
+    const folder=chosenSet.audioFolder||'audio'; const nextAudio=assetUrl(q.track,folder);
     const currentPath=decodeURIComponent(new URL(audioPlayer.src||location.href,location.href).pathname);
     const wantedPath=decodeURIComponent(new URL(nextAudio,location.href).pathname);
     if(currentPath!==wantedPath){audioPlayer.src=nextAudio;audioPlayer.load();}
     questionBadge.textContent=q.id; questionText.textContent=q.question; optionsList.innerHTML='';
-    q.options.forEach((option,optionIndex)=>{
-      const btn=document.createElement('button'); btn.type='button'; btn.className='option-row';
-      btn.innerHTML=`<span class="option-letter">${String.fromCharCode(65+optionIndex)}</span><span>${option}</span>`;
+
+    const normalizedOptions=q.options.map(normalizeOption);
+    const hasImages=normalizedOptions.some(option=>option.image);
+    optionsList.classList.toggle('image-options',hasImages);
+
+    normalizedOptions.forEach((option,optionIndex)=>{
+      const btn=document.createElement('button'); btn.type='button'; btn.className=`option-row${option.image?' image-option':''}`;
+      const letter=document.createElement('span'); letter.className='option-letter'; letter.textContent=String.fromCharCode(65+optionIndex); btn.appendChild(letter);
+      const content=document.createElement('span'); content.className='option-content';
+      if(option.image){
+        const img=document.createElement('img');
+        const imageFolder=q.imageFolder||chosenSet.imageFolder||'images';
+        img.src=assetUrl(option.image,imageFolder); img.alt=option.alt; img.loading='lazy'; content.appendChild(img);
+      }
+      if(option.text){ const text=document.createElement('span'); text.className='option-text'; text.textContent=option.text; content.appendChild(text); }
+      btn.appendChild(content);
+      btn.setAttribute('aria-label',`Pilihan ${String.fromCharCode(65+optionIndex)}${option.alt?`: ${option.alt}`:''}`);
       if(state.answers[state.current]===optionIndex)btn.classList.add('selected');
       if(state.checked[state.current]){btn.disabled=true;if(optionIndex===q.answer)btn.classList.add('correct');if(optionIndex===state.answers[state.current]&&optionIndex!==q.answer)btn.classList.add('wrong');}
       btn.addEventListener('click',()=>{if(state.checked[state.current])return;state.answers[state.current]=optionIndex;questionAlert.textContent='';renderQuestion();}); optionsList.appendChild(btn);
