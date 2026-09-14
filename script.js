@@ -8,6 +8,7 @@
   const resultCard = document.getElementById('resultCard');
   const startBtn = document.getElementById('startBtn');
   const retryBtn = document.getElementById('retryBtn');
+  const homeBtn = document.getElementById('homeBtn');
   const setPicker = document.getElementById('setPicker');
   const questionNav = document.getElementById('questionNav');
   const passageTitle = document.getElementById('passageTitle');
@@ -27,6 +28,7 @@
 
   function resetState(){ state.current=0; state.answers={}; state.checked={}; state.score=0; }
   function encodePath(path){ return path.split('/').map(encodeURIComponent).join('/'); }
+  function goHome(){ audioPlayer.pause(); audioPlayer.currentTime=0; quizApp.classList.add('hidden'); resultCard.classList.add('hidden'); welcomeCard.classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'}); }
   function selectSet(key){
     selectedSetKey=key;
     [...setPicker.querySelectorAll('.set-card')].forEach(card=>{
@@ -82,5 +84,6 @@
   });
   prevBtn.addEventListener('click',()=>{if(state.current>0){state.current--;renderQuestion();}});
   nextBtn.addEventListener('click',()=>{if(!markCurrent())return;renderQuestion();if(state.current===data.length-1){const allAnswered=data.every((_,i)=>state.answers[i]!==undefined);if(!allAnswered){const firstMissing=data.findIndex((_,i)=>state.answers[i]===undefined);state.current=firstMissing;renderQuestion();questionAlert.textContent='Masih ada soalan yang belum dijawab.';return;}data.forEach((_,i)=>{if(!state.checked[i]){state.current=i;markCurrent();}});showResults();return;}state.current++;renderQuestion();});
-  retryBtn.addEventListener('click',()=>{quizApp.classList.add('hidden');resultCard.classList.add('hidden');welcomeCard.classList.remove('hidden');audioPlayer.pause();window.scrollTo({top:0,behavior:'smooth'});});
+  homeBtn.addEventListener('click',goHome);
+  retryBtn.addEventListener('click',goHome);
 })();
