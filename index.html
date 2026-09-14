@@ -10,9 +10,7 @@
 <body>
   <header class="site-header">
     <div class="header-inner">
-      <div class="brand-mark" aria-hidden="true">
-        <span class="headphone">🎧</span>
-      </div>
+      <div class="brand-mark" aria-hidden="true"><span class="headphone">🎧</span></div>
       <div class="brand-copy">
         <h1>Latihan Kefahaman Mendengar</h1>
         <p>Dengar <span>•</span> Faham <span>•</span> Jawab <span>•</span> Tingkatkan Kemahiran</p>
@@ -26,8 +24,25 @@
       <div class="welcome-icon" aria-hidden="true">▣</div>
       <div class="welcome-copy">
         <h2>Selamat Datang!</h2>
-        <p>Ini ialah latihan kefahaman mendengar. Dengar setiap petikan dengan teliti dan jawab semua soalan. Keputusan akan dipaparkan sebaik sahaja anda menyelesaikan latihan.</p>
+        <p>Pilih set latihan yang ingin dibuat, kemudian masukkan nama dan kelas sebelum memulakan latihan.</p>
       </div>
+
+      <div class="set-picker-wrap">
+        <p class="set-picker-label">Pilih set latihan:</p>
+        <div id="setPicker" class="set-picker" role="radiogroup" aria-label="Pilih set latihan">
+          <button type="button" class="set-card selected" data-set="latihan1" role="radio" aria-checked="true">
+            <span class="set-number">01</span>
+            <span class="set-copy"><strong>Latihan 1</strong><small>10 soalan • 6 petikan</small></span>
+            <span class="set-check">✓</span>
+          </button>
+          <button type="button" class="set-card" data-set="latihan2" role="radio" aria-checked="false">
+            <span class="set-number">02</span>
+            <span class="set-copy"><strong>Latihan 2</strong><small>Set latihan baharu</small></span>
+            <span class="set-check">✓</span>
+          </button>
+        </div>
+      </div>
+
       <div class="student-fields">
         <label>Nama:
           <input id="studentName" type="text" placeholder="Masukkan nama anda" autocomplete="name">
@@ -42,38 +57,24 @@
 
     <section id="quizApp" class="quiz-shell hidden" aria-live="polite">
       <aside class="question-sidebar">
-        <div class="sidebar-title"><span aria-hidden="true">🎧</span> Senarai Soalan</div>
+        <div class="sidebar-title"><span aria-hidden="true">🎧</span> <span id="activeSetLabel">Latihan 1</span></div>
         <nav id="questionNav" class="question-nav" aria-label="Senarai soalan"></nav>
       </aside>
 
       <section class="quiz-main">
         <div class="passage-banner">
           <div class="radio-icon" aria-hidden="true">▰</div>
-          <div>
-            <h2 id="passageTitle">Petikan 1</h2>
-            <p>Dengarkan petikan di bawah dengan teliti.</p>
-          </div>
+          <div><h2 id="passageTitle">Petikan 1</h2><p>Dengarkan petikan di bawah dengan teliti.</p></div>
         </div>
-
-        <div class="audio-wrap">
-          <audio id="audioPlayer" controls preload="metadata"></audio>
-        </div>
-
+        <div class="audio-wrap"><audio id="audioPlayer" controls preload="metadata"></audio></div>
         <article id="questionCard" class="question-card">
-          <div class="question-heading">
-            <span id="questionBadge" class="question-badge">1</span>
-            <h3 id="questionText"></h3>
-          </div>
+          <div class="question-heading"><span id="questionBadge" class="question-badge">1</span><h3 id="questionText"></h3></div>
           <div id="optionsList" class="options-list"></div>
           <div id="feedbackBox" class="feedback-box hidden" aria-live="polite"></div>
         </article>
-
         <div class="quiz-footer">
           <button id="prevBtn" class="nav-btn secondary" type="button">‹ Sebelum</button>
-          <div class="progress-block">
-            <p id="questionCounter">Soalan 1 daripada 10</p>
-            <div class="progress-track" aria-hidden="true"><div id="progressBar" class="progress-bar"></div></div>
-          </div>
+          <div class="progress-block"><p id="questionCounter">Soalan 1 daripada 10</p><div class="progress-track" aria-hidden="true"><div id="progressBar" class="progress-bar"></div></div></div>
           <button id="nextBtn" class="nav-btn primary" type="button">Seterusnya ›</button>
         </div>
         <p id="questionAlert" class="question-alert" role="alert"></p>
@@ -81,7 +82,7 @@
     </section>
 
     <section id="resultCard" class="result-card hidden" aria-live="polite">
-      <p class="result-kicker">Latihan selesai</p>
+      <p id="resultSetLabel" class="result-kicker">Latihan selesai</p>
       <h2 id="resultTitle">Syabas!</h2>
       <div id="finalScore" class="final-score">0 / 10</div>
       <p id="resultMessage"></p>
@@ -90,7 +91,7 @@
         <div><span>Salah</span><strong id="wrongCount">0</strong></div>
         <div><span>Peratus</span><strong id="percentage">0%</strong></div>
       </div>
-      <button id="retryBtn" class="start-btn compact" type="button">Cuba Semula</button>
+      <button id="retryBtn" class="start-btn compact" type="button">Pilih Latihan Lain</button>
     </section>
   </main>
 
