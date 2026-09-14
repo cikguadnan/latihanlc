@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f766e">
+  <title>Latihan Kefahaman Mendengar 3E</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div>
+        <p class="eyebrow">Bahasa Melayu • Menengah 3 Ekspres</p>
+        <h1>Latihan Kefahaman Mendengar</h1>
+        <p class="hero-copy">Dengar setiap petikan dengan teliti, jawab semua soalan dan semak jawapan secara serta-merta.</p>
+      </div>
+      <div class="score-pill" aria-live="polite">
+        <span>Markah</span>
+        <strong id="liveScore">0 / 10</strong>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="startCard" class="panel start-card">
+      <h2>Sebelum bermula</h2>
+      <div class="form-grid">
+        <label>Nama
+          <input id="studentName" type="text" placeholder="Masukkan nama">
+        </label>
+        <label>Kelas
+          <input id="studentClass" type="text" placeholder="Contoh: 3E">
+        </label>
+      </div>
+      <div class="instructions">
+        <h3>Arahan</h3>
+        <ol>
+          <li>Dengar audio pengenalan jika diperlukan.</li>
+          <li>Setiap petikan mempunyai satu atau lebih soalan.</li>
+          <li>Pilih satu jawapan bagi setiap soalan.</li>
+          <li>Tekan <strong>Semak Petikan</strong> untuk menerima maklum balas segera.</li>
+        </ol>
+      </div>
+      <details class="intro-audio">
+        <summary>Dengar audio pengenalan</summary>
+        <audio controls preload="metadata">
+          <source src="audio/01%20Track%201.mp3" type="audio/mpeg">
+        </audio>
+      </details>
+      <button id="startBtn" class="primary-btn" type="button">Mulakan Latihan</button>
+      <p id="startError" class="error-text" role="alert"></p>
+    </section>
+
+    <section id="quizArea" class="hidden"></section>
+
+    <section id="finalCard" class="panel final-card hidden" aria-live="polite">
+      <p class="eyebrow">Latihan selesai</p>
+      <h2 id="finalTitle">Syabas!</h2>
+      <div class="final-score" id="finalScore">0 / 10</div>
+      <p id="finalMessage"></p>
+      <div class="summary-grid">
+        <div><span>Betul</span><strong id="correctCount">0</strong></div>
+        <div><span>Salah</span><strong id="wrongCount">0</strong></div>
+        <div><span>Peratus</span><strong id="percentage">0%</strong></div>
+      </div>
+      <button id="retryBtn" class="secondary-btn" type="button">Cuba Semula</button>
+    </section>
+  </main>
+
+  <template id="sectionTemplate">
+    <article class="panel quiz-section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow section-label"></p>
+          <h2 class="section-title"></h2>
+        </div>
+        <span class="section-status">Belum disemak</span>
+      </div>
+      <div class="audio-card">
+        <div class="audio-icon">♪</div>
+        <div class="audio-copy">
+          <strong>Dengar petikan</strong>
+          <span>Gunakan fon telinga jika perlu.</span>
+        </div>
+        <audio class="track-player" controls preload="metadata"></audio>
+      </div>
+      <div class="question-list"></div>
+      <button class="primary-btn check-section" type="button">Semak Petikan</button>
+      <p class="section-alert" role="alert"></p>
+    </article>
+  </template>
+
+  <script src="questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
